@@ -525,9 +525,8 @@
       }).then(r => r.json()).then(res => res.ok ? resolve(res.data) : reject(new Error(res.error))).catch(reject);
     });
   }
-
-  // ==========================================
-  // SCHEDULE DATA (HARDCODED FROM PDF)
+// ==========================================
+  // SCHEDULE DATA (تم توحيد أسماء المعلمين لمنع التكرار)
   // Sections: A = الشعبة 1, B = الشعبة 2, C = الشعبة 3
   // ==========================================
   const SCHEDULE = {
@@ -542,7 +541,7 @@
       "C": [{ session: "الأولى", subject: "انجليزي", teacher: "إيمان العص" }, { session: "الثانية", subject: "علوم", teacher: "براءة قاسم" }]
     },
     "الاثنين": {
-      "A": [{ session: "الأولى", subject: "انجليزي", teacher: "إيمان العص" }, { session: "الثانية", subject: "علوم", teacher: "براءة ديبو" }],
+      "A": [{ session: "الأولى", subject: "انجليزي", teacher: "إيمان العص" }, { session: "الثانية", subject: "علوم", teacher: "براءة قاسم" }], // تم التوحيد إلى براءة قاسم
       "B": [{ session: "الأولى", subject: "عربي", teacher: "صباح قاسم" }, { session: "الثانية", subject: "فيزياء", teacher: "منال عريضة" }],
       "C": [{ session: "الأولى", subject: "فيزياء", teacher: "منال عريضة" }, { session: "الثانية", subject: "انجليزي", teacher: "إيمان العص" }]
     },
@@ -552,7 +551,7 @@
       "C": [{ session: "الأولى", subject: "كيمياء", teacher: "آلاء زيتون" }, { session: "الثانية", subject: "رياضيات", teacher: "مأمون درويش" }]
     },
     "الأربعاء": {
-      "A": [{ session: "الأولى", subject: "كيمياء", teacher: "نور الحوراني" }, { session: "الثانية", subject: "عربي", teacher: "صباح قاسم" }],
+      "A": [{ session: "الأولى", subject: "كيمياء", teacher: "نور حوراني" }, { session: "الثانية", subject: "عربي", teacher: "صباح قاسم" }], // تم التوحيد إلى نور حوراني
       "B": [{ session: "الأولى", subject: "عربي", teacher: "صباح قاسم" }, { session: "الثانية", subject: "كيمياء", teacher: "نور حوراني" }],
       "C": [{ session: "الأولى", subject: "عربي", teacher: "عيسى حمزة" }, { session: "الثانية", subject: "فرنسي", teacher: "سلمى الشايطة" }]
     },

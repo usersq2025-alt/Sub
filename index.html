@@ -152,7 +152,6 @@
       pointer-events:none;color:var(--text-3);display:flex;
     }
     
-    /* Subject Selector specific styling */
     #subjectFilter { min-width: 180px; font-weight: 600; color: var(--accent); }
 
     .theme-btn{
@@ -191,7 +190,6 @@
     .pct.g{background:var(--green-badge);color:var(--green-text)}
     .pct.r{background:var(--red-badge);color:var(--red-text)}
     
-    /* Occupancy Bar logic */
     .occ-wrap { display: flex; flex-direction: column; width: 100%; margin-right: auto; max-width: 80px;}
     .occ-bar-bg { width: 100%; height: 6px; background: var(--border-med); border-radius: 3px; overflow: hidden; margin-top: 4px; }
     .occ-bar-fill { height: 100%; background: #3b82f6; transition: width 0.3s; }
@@ -272,6 +270,7 @@
     }
     .av.g{background:var(--green-badge);color:var(--green-text)}
     .av.r{background:var(--red-badge);color:var(--red-text)}
+    .av.b{background:rgba(59,130,246,0.1);color:#3b82f6}
     .card-body{flex:1;min-width:0}
     .card-name{font-size:15px;font-weight:600;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .card-sec{font-size:12px;font-weight:500;color:var(--text-3);margin-top:2px}
@@ -360,6 +359,13 @@
       opacity:0;transition:opacity .3s;white-space:nowrap;z-index:300;
     }
     .draft-indicator.show{opacity:1}
+
+    /* Teachers UI */
+    .t-input{ width:70px; height:40px; text-align:center; font-size:16px; font-weight:700; border:2px solid var(--border-med); border-radius:8px; background:var(--surface-2); color:var(--text-1); outline:none; transition:all .2s; } 
+    .t-input:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-alpha);}
+    .dash-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:22px; margin-bottom:18px; box-shadow:var(--shadow-sm); }
+    .dash-card-title{ font-size:15px;font-weight:700; margin-bottom:18px; display:flex;align-items:center;gap:9px; color:var(--text-1); } 
+    .dash-card-title svg{width:17px;color:var(--accent);flex-shrink:0}
   </style>
 </head>
 <body>
@@ -373,6 +379,12 @@
       </div>
 
       <div class="hdr-right">
+        <!-- زر المعلمين الجديد -->
+        <button id="toggleTeachersBtn" class="dash-btn" onclick="toggleTeachers()">
+          <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <span class="mob-hide">المعلمين</span>
+        </button>
+
         <!-- 1. Section Filter -->
         <div class="sel-wrap" id="secFilterWrap">
           <select id="sectionFilter" class="ctrl" onchange="handleSectionChange()">
@@ -383,7 +395,7 @@
           <span class="sel-arrow"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
         </div>
 
-        <!-- 2. Subject Filter (NEW) -->
+        <!-- 2. Subject Filter -->
         <div class="sel-wrap" id="subjectFilterWrap">
           <select id="subjectFilter" class="ctrl" onchange="handleSubjectChange()">
             <option value="">اختر المادة/الحصة...</option>
@@ -408,7 +420,7 @@
   </header>
 
   <!-- SUMMARY STATS -->
-  <div class="stats">
+  <div class="stats" id="studentStats">
     <div class="stat">
       <div class="stat-ico g"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>
       <div>
@@ -494,11 +506,22 @@
     </div>
   </div>
 
+  <!-- TEACHERS UI (NEW) -->
+  <div id="teachersUI" class="gone" style="padding:0 22px 40px; animation:fadeUp .3s ease-out;">
+    <div class="dash-card">
+      <div class="dash-card-title">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        سجل حصص المعلمين (أدخل عدد الحصص التي أُعطيت اليوم)
+      </div>
+      <div class="s-list" id="teachersListUI"></div>
+    </div>
+  </div>
+
   <div class="save-bar">
     <div class="save-inner" id="saveInner">
       <button class="save-btn" id="saveBtn" onclick="submitAttendance()">
         <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        حفظ سجل المادة في قاعدة البيانات
+        <span id="saveBtnTxt">حفظ سجل المادة في قاعدة البيانات</span>
       </button>
       <div id="statusMsg"></div>
     </div>
@@ -510,7 +533,7 @@
   // ==========================================
   // GAS CONNECTION
   // ==========================================
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyheLZNhNZwESobfmVVg7aU3_zjGVWEe1FFipRgfh4qLW746m-bIRpNkBsVvdZc3j42gg/exec'; 
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbzEBVHVYv4zK8s71uOxYydwj3S8LoNSzs8gvEwjobL1ysD4EOLuHEuy0Kt6NVFWCKQR-w/exec'; 
   
   function gasCall(fnName, ...args){
     return new Promise((resolve, reject) => {
@@ -525,7 +548,8 @@
       }).then(r => r.json()).then(res => res.ok ? resolve(res.data) : reject(new Error(res.error))).catch(reject);
     });
   }
-// ==========================================
+
+  // ==========================================
   // SCHEDULE DATA (تم توحيد أسماء المعلمين لمنع التكرار)
   // Sections: A = الشعبة 1, B = الشعبة 2, C = الشعبة 3
   // ==========================================
@@ -541,7 +565,7 @@
       "C": [{ session: "الأولى", subject: "انجليزي", teacher: "إيمان العص" }, { session: "الثانية", subject: "علوم", teacher: "براءة قاسم" }]
     },
     "الاثنين": {
-      "A": [{ session: "الأولى", subject: "انجليزي", teacher: "إيمان العص" }, { session: "الثانية", subject: "علوم", teacher: "براءة قاسم" }], // تم التوحيد إلى براءة قاسم
+      "A": [{ session: "الأولى", subject: "انجليزي", teacher: "إيمان العص" }, { session: "الثانية", subject: "علوم", teacher: "براءة قاسم" }], 
       "B": [{ session: "الأولى", subject: "عربي", teacher: "صباح قاسم" }, { session: "الثانية", subject: "فيزياء", teacher: "منال عريضة" }],
       "C": [{ session: "الأولى", subject: "فيزياء", teacher: "منال عريضة" }, { session: "الثانية", subject: "انجليزي", teacher: "إيمان العص" }]
     },
@@ -551,7 +575,7 @@
       "C": [{ session: "الأولى", subject: "كيمياء", teacher: "آلاء زيتون" }, { session: "الثانية", subject: "رياضيات", teacher: "مأمون درويش" }]
     },
     "الأربعاء": {
-      "A": [{ session: "الأولى", subject: "كيمياء", teacher: "نور حوراني" }, { session: "الثانية", subject: "عربي", teacher: "صباح قاسم" }], // تم التوحيد إلى نور حوراني
+      "A": [{ session: "الأولى", subject: "كيمياء", teacher: "نور حوراني" }, { session: "الثانية", subject: "عربي", teacher: "صباح قاسم" }], 
       "B": [{ session: "الأولى", subject: "عربي", teacher: "صباح قاسم" }, { session: "الثانية", subject: "كيمياء", teacher: "نور حوراني" }],
       "C": [{ session: "الأولى", subject: "عربي", teacher: "عيسى حمزة" }, { session: "الثانية", subject: "فرنسي", teacher: "سلمى الشايطة" }]
     },
@@ -567,7 +591,8 @@
   // ==========================================
   // STATE
   // ==========================================
-  let allStudents=[], currentSectionStudents=[], present=[], absent=[], origMap={}, activeTab='present';
+  let allStudents=[], currentSectionStudents=[], present=[], absent=[], origMap={}, activeTab='present', viewMode='attendance';
+  let teachersList = [], teachersAttMap = {};
   const ROOM_CAPACITY = 35;
 
   // ==========================================
@@ -619,7 +644,6 @@
       const classes = SCHEDULE[dayName][section];
       classes.forEach((cls, idx) => {
         const option = document.createElement('option');
-        // Value contains JSON so we can easily parse it on save
         option.value = JSON.stringify(cls); 
         option.textContent = `الحصة ${cls.session}: ${cls.subject} (${cls.teacher})`;
         subjSelect.appendChild(option);
@@ -654,7 +678,8 @@
   function handleDateChange(){
     const wrap = document.getElementById('dateWrap');
     wrap.classList.toggle('is-today', document.getElementById('datePicker').value === getTodayStr());
-    updateScheduleDropdown();
+    if (viewMode === 'teachers') loadTeachersForDate();
+    else updateScheduleDropdown();
   }
 
   function handleSectionChange(){
@@ -665,6 +690,7 @@
     const subjVal = document.getElementById('subjectFilter').value;
     if(!subjVal) {
       document.getElementById('attendanceUI').classList.add('gone');
+      document.getElementById('saveInner').classList.remove('vis');
       return;
     }
 
@@ -672,20 +698,18 @@
     const date = document.getElementById('datePicker').value;
     const subjData = JSON.parse(subjVal);
 
-    // Filter students for the selected section
     currentSectionStudents = allStudents.filter(s => s.section === section);
     
     document.getElementById('attendanceUI').classList.remove('gone');
     document.getElementById('attendanceUI').classList.add('dim');
 
-    // Fetch existing attendance for this specific Subject/Session
     gasCall('getAttendanceForSubject', date, section, subjData)
       .then(result => {
         origMap = result.attendance;
         applyMap(result.attendance);
         document.getElementById('recBanner').classList.toggle('gone', result.isRecorded);
         document.getElementById('attendanceUI').classList.remove('dim');
-        undoStack = []; // Reset undo on load
+        undoStack = []; 
         document.getElementById('undoBtn').classList.add('gone');
       })
       .catch(e => { alert(e.message); document.getElementById('attendanceUI').classList.remove('dim'); });
@@ -695,6 +719,63 @@
     present = []; absent = [];
     currentSectionStudents.forEach(s => (map[s.id] === false ? absent : present).push(s));
     renderLists();
+  }
+
+  // ==========================================
+  // TOGGLE VIEWS
+  // ==========================================
+  function toggleTeachers(){
+    if(viewMode === 'teachers') {
+      viewMode = 'attendance';
+      document.getElementById('toggleTeachersBtn').classList.remove('active');
+      document.getElementById('teachersUI').classList.add('gone');
+      
+      document.getElementById('secFilterWrap').classList.remove('gone');
+      document.getElementById('subjectFilterWrap').classList.remove('gone');
+      document.getElementById('studentStats').classList.remove('gone');
+      document.getElementById('saveBtnTxt').textContent = 'حفظ سجل المادة في قاعدة البيانات';
+      updateScheduleDropdown();
+    } else {
+      viewMode = 'teachers';
+      document.getElementById('toggleTeachersBtn').classList.add('active');
+      
+      document.getElementById('attendanceUI').classList.add('gone');
+      document.getElementById('secFilterWrap').classList.add('gone');
+      document.getElementById('subjectFilterWrap').classList.add('gone');
+      document.getElementById('studentStats').classList.add('gone');
+      
+      document.getElementById('teachersUI').classList.remove('gone');
+      document.getElementById('saveInner').classList.add('vis');
+      document.getElementById('saveBtnTxt').textContent = 'حفظ تفقد المعلمين';
+      loadTeachersForDate();
+    }
+  }
+
+  // ==========================================
+  // TEACHERS UI LOGIC
+  // ==========================================
+  function loadTeachersForDate() {
+    const d = document.getElementById('datePicker').value;
+    const ui = document.getElementById('teachersUI');
+    ui.classList.add('dim');
+    gasCall('getTeachersData', d).then(res => {
+      teachersList = res.teachers; teachersAttMap = res.attendance || {};
+      renderTeachers(); ui.classList.remove('dim');
+    }).catch(e => { showMsg(e.message, false); ui.classList.remove('dim'); });
+  }
+
+  function renderTeachers() {
+    const el = document.getElementById('teachersListUI');
+    if (!teachersList.length) { 
+      el.innerHTML = `<div class="empty"><div class="empty-t">لا يوجد معلمين مسجلين في الشيت</div><div class="empty-s">يرجى إضافة المعلمين في شيت Teachers-Att أولاً</div></div>`; 
+      return; 
+    }
+    el.innerHTML = teachersList.map((t, i) => `
+      <div class="s-card" style="animation-delay:${Math.min(i*.022,.28)}s">
+        <div class="av b">${ini(t.name)}</div>
+        <div class="card-body"><div class="card-name">${t.name}</div><div class="card-sec">${t.subject}</div></div>
+        <div><input type="number" id="t-inp-${t.id}" class="t-input" min="0" placeholder="0" value="${teachersAttMap[t.id] !== undefined ? teachersAttMap[t.id] : ''}"></div>
+      </div>`).join('');
   }
 
   // ==========================================
@@ -776,6 +857,7 @@
   }
 
   function checkChanges(){
+    if(viewMode === 'teachers') return; // لا تخفي الزر في وضع المعلمين
     let ch = false;
     absent.forEach(s  => { if(origMap[s.id] !== false) ch=true; });
     present.forEach(s => { if(origMap[s.id] === false) ch=true; });
@@ -799,13 +881,27 @@
   }
 
   function submitAttendance(){
+    const btn = document.getElementById('saveBtn');
+    const date = document.getElementById('datePicker').value;
+
+    if (viewMode === 'teachers') {
+      btn.disabled = true; btn.innerHTML = `<div class="spin" style="width:18px;height:18px;border-width:2px;border-color:rgba(255,255,255,.2);border-top-color:#fff"></div>`;
+      const payload = {};
+      teachersList.forEach(t => { const val = document.getElementById(`t-inp-${t.id}`).value; if (val !== '') payload[t.id] = parseInt(val, 10); });
+      
+      gasCall('saveTeacherAttendance', { date, attendance: payload }).then(msg => {
+        showMsg(msg || 'تم حفظ تفقد المعلمين بنجاح ✓', true); 
+        btn.disabled = false;
+        btn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> <span id="saveBtnTxt">حفظ تفقد المعلمين</span>`;
+      }).catch(e => { showMsg(e.message, false); btn.disabled = false; btn.innerHTML = 'إعادة المحاولة'; });
+      return;
+    }
+
     const subjVal = document.getElementById('subjectFilter').value;
     if(!subjVal) return;
 
-    const btn = document.getElementById('saveBtn');
     btn.disabled = true; btn.innerHTML = `<div class="spin" style="width:18px;height:18px;border-width:2px;border-color:rgba(255,255,255,.2);border-top-color:#fff"></div>`;
 
-    const date = document.getElementById('datePicker').value;
     const section = document.getElementById('sectionFilter').value;
     const subjectInfo = JSON.parse(subjVal);
     
@@ -822,7 +918,7 @@
         document.getElementById('recBanner').classList.add('gone');
         showMsg('تم حفظ سجل المادة بنجاح في قاعدة البيانات ✓', true);
         btn.disabled = false;
-        btn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> حفظ سجل المادة في قاعدة البيانات`;
+        btn.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> <span id="saveBtnTxt">حفظ سجل المادة في قاعدة البيانات</span>`;
       })
       .catch(e => { 
         showMsg(e.message, false); 

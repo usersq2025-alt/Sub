@@ -152,7 +152,8 @@
       pointer-events:none;color:var(--text-3);display:flex;
     }
     
-    #subjectFilter { min-width: 180px; font-weight: 600; color: var(--accent); }
+    #subjectFilter { min-width: 140px; font-weight: 600; }
+    #actualTeacherFilter { min-width: 180px; font-weight: 600; color: var(--accent); }
 
     .theme-btn{
       width:40px;height:40px;border-radius:var(--r-sm);border:1px solid var(--border-med);
@@ -379,31 +380,49 @@
       </div>
 
       <div class="hdr-right">
-        <!-- زر المعلمين الجديد -->
+        <!-- زر المعلمين تم تعديله ليكون واضحاً في الجوال -->
         <button id="toggleTeachersBtn" class="dash-btn" onclick="toggleTeachers()">
           <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-          <span class="mob-hide">المعلمين</span>
+          <span>المعلمين</span>
         </button>
 
-        <!-- 1. Section Filter -->
+        <!-- 1. Section Filter (معدل للذكور والإناث) -->
         <div class="sel-wrap" id="secFilterWrap">
           <select id="sectionFilter" class="ctrl" onchange="handleSectionChange()">
-            <option value="A">الشعبة 1 (إناث)</option>
-            <option value="B">الشعبة 2 (إناث)</option>
-            <option value="C">الشعبة 3 (ذكور)</option>
+            <option value="A-B">شعبة الإناث (A - B)</option>
+            <option value="C">شعبة الذكور (C)</option>
           </select>
           <span class="sel-arrow"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
         </div>
 
-        <!-- 2. Subject Filter -->
+        <!-- 2. Session Filter (معدل لاختيار الحصة فقط) -->
         <div class="sel-wrap" id="subjectFilterWrap">
           <select id="subjectFilter" class="ctrl" onchange="handleSubjectChange()">
-            <option value="">اختر المادة/الحصة...</option>
+            <option value="">اختر الحصة...</option>
           </select>
           <span class="sel-arrow"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
         </div>
 
-        <!-- 3. Date Picker -->
+        <!-- 3. Teacher Filter (فلتر جديد يظهر بعد اختيار الحصة) -->
+        <div class="sel-wrap gone" id="teacherFilterWrap">
+          <select id="actualTeacherFilter" class="ctrl" onchange="handleTeacherChange()">
+            <option value="">اختر المعلم...</option>
+            <option value="صباح قاسم">صباح قاسم</option>
+            <option value="سلمى الشايطة">سلمى الشايطة</option>
+            <option value="براءة قاسم">براءة قاسم</option>
+            <option value="عيسى حمزة">عيسى حمزة</option>
+            <option value="مأمون درويش">مأمون درويش</option>
+            <option value="إيمان الترك">إيمان الترك</option>
+            <option value="إيمان العص">إيمان العص</option>
+            <option value="خديجة غريبو">خديجة غريبو</option>
+            <option value="منال عريضة">منال عريضة</option>
+            <option value="آلاء زيتون">آلاء زيتون</option>
+            <option value="نور حوراني">نور حوراني</option>
+          </select>
+          <span class="sel-arrow"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>
+        </div>
+
+        <!-- 4. Date Picker -->
         <div class="date-wrap" id="dateWrap">
           <span class="today-badge">اليوم</span>
           <input type="date" id="datePicker" class="ctrl" onchange="handleDateChange()">
@@ -533,7 +552,7 @@
   // ==========================================
   // GAS CONNECTION
   // ==========================================
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbxHDRb3Z3HY_IHT1JImzIJiOxi8WwspMIodPOpmJcLQjl-FWLn1BJAYvbawbdCqzCxA2w/exec'; 
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbxxg0dE5q4BJlORvweZbAkPYKZEyFs5E2zOSpbzytJ6Qd_4uvj6xYLcQ_nQq4ikXrTNQg/exec'; 
   
   function gasCall(fnName, ...args){
     return new Promise((resolve, reject) => {
@@ -550,42 +569,13 @@
   }
 
   // ==========================================
-  // SCHEDULE DATA (تم توحيد أسماء المعلمين لمنع التكرار)
-  // Sections: A = الشعبة 1, B = الشعبة 2, C = الشعبة 3
+  // DYNAMIC SCHEDULE (تم استبدال البرنامج الثابت ببرنامج مرن)
   // ==========================================
-  const SCHEDULE = {
-    "السبت": {
-      "A": [{ session: "الأولى", subject: "عربي", teacher: "صباح قاسم" }, { session: "الثانية", subject: "فرنسي", teacher: "سلمى الشايطة" }],
-      "B": [{ session: "الأولى", subject: "علوم", teacher: "براءة قاسم" }, { session: "الثانية", subject: "فرنسي", teacher: "سلمى الشايطة" }],
-      "C": [{ session: "الأولى", subject: "عربي", teacher: "عيسى حمزة" }, { session: "الثانية", subject: "رياضيات", teacher: "مأمون درويش" }]
-    },
-    "الأحد": {
-      "A": [{ session: "الأولى", subject: "رياضيات", teacher: "إيمان الترك" }, { session: "الثانية", subject: "انجليزي", teacher: "إيمان العص" }],
-      "B": [{ session: "الأولى", subject: "انجليزي", teacher: "خديجة غريبو" }, { session: "الثانية", subject: "رياضيات", teacher: "إيمان الترك" }],
-      "C": [{ session: "الأولى", subject: "انجليزي", teacher: "إيمان العص" }, { session: "الثانية", subject: "علوم", teacher: "براءة قاسم" }]
-    },
-    "الاثنين": {
-      "A": [{ session: "الأولى", subject: "انجليزي", teacher: "إيمان العص" }, { session: "الثانية", subject: "علوم", teacher: "براءة قاسم" }], 
-      "B": [{ session: "الأولى", subject: "عربي", teacher: "صباح قاسم" }, { session: "الثانية", subject: "فيزياء", teacher: "منال عريضة" }],
-      "C": [{ session: "الأولى", subject: "فيزياء", teacher: "منال عريضة" }, { session: "الثانية", subject: "انجليزي", teacher: "إيمان العص" }]
-    },
-    "الثلاثاء": {
-      "A": [{ session: "الأولى", subject: "فيزياء", teacher: "منال عريضة" }, { session: "الثانية", subject: "رياضيات", teacher: "إيمان الترك" }],
-      "B": [{ session: "الأولى", subject: "رياضيات", teacher: "إيمان الترك" }, { session: "الثانية", subject: "فيزياء", teacher: "منال عريضة" }],
-      "C": [{ session: "الأولى", subject: "كيمياء", teacher: "آلاء زيتون" }, { session: "الثانية", subject: "رياضيات", teacher: "مأمون درويش" }]
-    },
-    "الأربعاء": {
-      "A": [{ session: "الأولى", subject: "كيمياء", teacher: "نور حوراني" }, { session: "الثانية", subject: "عربي", teacher: "صباح قاسم" }], 
-      "B": [{ session: "الأولى", subject: "عربي", teacher: "صباح قاسم" }, { session: "الثانية", subject: "كيمياء", teacher: "نور حوراني" }],
-      "C": [{ session: "الأولى", subject: "عربي", teacher: "عيسى حمزة" }, { session: "الثانية", subject: "فرنسي", teacher: "سلمى الشايطة" }]
-    },
-    "الخميس": {
-      "A": [{ session: "الأولى", subject: "رياضيات", teacher: "إيمان الترك" }, { session: "الثانية", subject: "فيزياء", teacher: "منال عريضة" }],
-      "B": [{ session: "الأولى", subject: "انجليزي", teacher: "خديجة غريبو" }, { session: "الثانية", subject: "رياضيات", teacher: "إيمان الترك" }],
-      "C": [{ session: "الأولى", subject: "فيزياء", teacher: "منال عريضة" }, { session: "الثانية", subject: "رياضيات", teacher: "مأمون درويش" }]
-    }
+  const SCHEDULE_DAYS = {
+    "الأحد": true, "الاثنين": true, "الثلاثاء": true, 
+    "الأربعاء": true, "الخميس": true, "السبت": true
   };
-
+  const SESSIONS = ["الأولى", "الثانية", "الثالثة", "الرابعة"];
   const DAYS_MAP = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
   // ==========================================
@@ -630,22 +620,22 @@
 
   function updateScheduleDropdown(){
     const dateStr = document.getElementById('datePicker').value;
-    const section = document.getElementById('sectionFilter').value;
     const subjSelect = document.getElementById('subjectFilter');
     
-    subjSelect.innerHTML = '<option value="">اختر المادة/الحصة...</option>';
-    document.getElementById('attendanceUI').classList.add('gone'); // Hide until subject picked
+    subjSelect.innerHTML = '<option value="">اختر الحصة...</option>';
+    document.getElementById('teacherFilterWrap').classList.add('gone');
+    document.getElementById('actualTeacherFilter').value = "";
+    document.getElementById('attendanceUI').classList.add('gone');
 
     if(!dateStr) return;
     const dateObj = new Date(dateStr);
     const dayName = DAYS_MAP[dateObj.getDay()];
 
-    if(SCHEDULE[dayName] && SCHEDULE[dayName][section]){
-      const classes = SCHEDULE[dayName][section];
-      classes.forEach((cls, idx) => {
+    if(SCHEDULE_DAYS[dayName]){
+      SESSIONS.forEach(sess => {
         const option = document.createElement('option');
-        option.value = JSON.stringify(cls); 
-        option.textContent = `الحصة ${cls.session}: ${cls.subject} (${cls.teacher})`;
+        option.value = sess; 
+        option.textContent = `الحصة ${sess}`;
         subjSelect.appendChild(option);
       });
     } else {
@@ -687,8 +677,25 @@
   }
 
   function handleSubjectChange(){
-    const subjVal = document.getElementById('subjectFilter').value;
-    if(!subjVal) {
+    const sessVal = document.getElementById('subjectFilter').value;
+    if(!sessVal) {
+      document.getElementById('teacherFilterWrap').classList.add('gone');
+      document.getElementById('attendanceUI').classList.add('gone');
+      document.getElementById('saveInner').classList.remove('vis');
+      return;
+    }
+    // إظهار قائمة اختيار المعلم الفعلي
+    document.getElementById('teacherFilterWrap').classList.remove('gone');
+    document.getElementById('actualTeacherFilter').value = "";
+    document.getElementById('attendanceUI').classList.add('gone');
+    document.getElementById('saveInner').classList.remove('vis');
+  }
+
+  function handleTeacherChange(){
+    const sessVal = document.getElementById('subjectFilter').value;
+    const teacherVal = document.getElementById('actualTeacherFilter').value;
+    
+    if(!teacherVal) {
       document.getElementById('attendanceUI').classList.add('gone');
       document.getElementById('saveInner').classList.remove('vis');
       return;
@@ -696,9 +703,17 @@
 
     const section = document.getElementById('sectionFilter').value;
     const date = document.getElementById('datePicker').value;
-    const subjData = JSON.parse(subjVal);
+    
+    // بناء بيانات الحصة لإرسالها
+    const subjData = { session: sessVal, teacher: teacherVal, subject: "حسب اختيار المعلم" };
 
-    currentSectionStudents = allStudents.filter(s => s.section === section);
+    // فلترة الطلاب بناءً على الشعبة المدمجة (الإناث أو الذكور)
+    currentSectionStudents = allStudents.filter(s => {
+      if (section === 'A-B') {
+        return s.section === 'A' || s.section === 'B' || s.section === 'A-B';
+      }
+      return s.section === section;
+    });
     
     document.getElementById('attendanceUI').classList.remove('gone');
     document.getElementById('attendanceUI').classList.add('dim');
@@ -732,6 +747,9 @@
       
       document.getElementById('secFilterWrap').classList.remove('gone');
       document.getElementById('subjectFilterWrap').classList.remove('gone');
+      if(document.getElementById('subjectFilter').value) {
+        document.getElementById('teacherFilterWrap').classList.remove('gone');
+      }
       document.getElementById('studentStats').classList.remove('gone');
       document.getElementById('saveBtnTxt').textContent = 'حفظ سجل المادة في قاعدة البيانات';
       updateScheduleDropdown();
@@ -742,6 +760,7 @@
       document.getElementById('attendanceUI').classList.add('gone');
       document.getElementById('secFilterWrap').classList.add('gone');
       document.getElementById('subjectFilterWrap').classList.add('gone');
+      document.getElementById('teacherFilterWrap').classList.add('gone');
       document.getElementById('studentStats').classList.add('gone');
       
       document.getElementById('teachersUI').classList.remove('gone');
@@ -897,13 +916,14 @@
       return;
     }
 
-    const subjVal = document.getElementById('subjectFilter').value;
-    if(!subjVal) return;
+    const sessVal = document.getElementById('subjectFilter').value;
+    const teacherVal = document.getElementById('actualTeacherFilter').value;
+    if(!sessVal || !teacherVal) return;
 
     btn.disabled = true; btn.innerHTML = `<div class="spin" style="width:18px;height:18px;border-width:2px;border-color:rgba(255,255,255,.2);border-top-color:#fff"></div>`;
 
     const section = document.getElementById('sectionFilter').value;
-    const subjectInfo = JSON.parse(subjVal);
+    const subjectInfo = { session: sessVal, teacher: teacherVal, subject: "حسب اختيار المعلم" };
     
     const attendance = {};
     present.forEach(s => { attendance[s.id] = true; });

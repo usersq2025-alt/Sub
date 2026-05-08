@@ -383,7 +383,7 @@
         <!-- زر المعلمين تم تعديله ليكون واضحاً في الجوال -->
         <button id="toggleTeachersBtn" class="dash-btn" onclick="toggleTeachers()">
           <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-          <span>المعلمين</span>
+          <span>تفقد المعلمين</span>
         </button>
 
         <!-- 1. Section Filter (معدل للذكور والإناث) -->
@@ -552,7 +552,7 @@
   // ==========================================
   // GAS CONNECTION
   // ==========================================
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbxxg0dE5q4BJlORvweZbAkPYKZEyFs5E2zOSpbzytJ6Qd_4uvj6xYLcQ_nQq4ikXrTNQg/exec'; 
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyCnfvzj3N_kgElH-GMYYSxQma6qJSHXzyK8G60XO2GVX1fJg2g0Z2Wm_fN5yIp7bYvOw/exec'; 
   
   function gasCall(fnName, ...args){
     return new Promise((resolve, reject) => {
@@ -575,7 +575,7 @@
     "الأحد": true, "الاثنين": true, "الثلاثاء": true, 
     "الأربعاء": true, "الخميس": true, "السبت": true
   };
-  const SESSIONS = ["الأولى", "الثانية", "الثالثة", "الرابعة"];
+  const SESSIONS = ["الأولى", "الثانية"]; // التعديل هنا ليعرض فقط الحصة الأولى والثانية
   const DAYS_MAP = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
   // ==========================================
